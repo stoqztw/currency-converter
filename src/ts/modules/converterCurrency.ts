@@ -1,4 +1,11 @@
-import { isForm, type FormOrNull } from "../types/converterCurrency.types";
+import { urlRequest } from "../api/exchange.api";
+import { getRecurce } from "../services/services";
+import {
+	isForm,
+	isFormDataEntryValue,
+	isInput,
+	type FormOrNull,
+} from "../types/htmlElement.types";
 import { changeIconsNearCurrency } from "./changeIconsNearCurrency";
 
 // Алгоритм
@@ -8,16 +15,35 @@ import { changeIconsNearCurrency } from "./changeIconsNearCurrency";
 // 4. Конвертация валюты
 // 5. Вывод выходной валюты
 
-// data select (document.querrySelect(selector).value)
-
-// FIXME: Нужно ли брать инпуты отдельно или достаточно диструктуризации?
-
-export function converterCurrency(
-	formSelector: string,
-	currencyAmountSelector: string,
-	currencyConvertedSelector: string
-): void {
+export function converterCurrency(formSelector: string, convertdInput: string) {
 	const form: FormOrNull = document.querySelector(formSelector);
+
+	function convert<T extends FormDataEntryValue | null>(
+		amount: T,
+		currencyInput: T,
+		currencyOutput: T,
+		outputSelector: string
+	) {
+		const outputResult: HTMLInputElement | null =
+			document.querySelector(outputSelector);
+
+		if (
+			isInput(outputResult) &&
+			isFormDataEntryValue(amount) &&
+			isFormDataEntryValue(currencyInput) &&
+			isFormDataEntryValue(currencyOutput)
+		) {
+			getRecurce(urlRequest + currencyInput.toString().toUpperCase()).then(
+				(data) => {
+					let currency: number =
+						data["conversion_rates"][currencyOutput.toString().toUpperCase()];
+						outputResult.value = (+amount * currency).toString();
+				}
+			);
+		}
+
+		return;
+	}
 
 	if (isForm(form)) {
 		form.addEventListener("input", (e) => {
@@ -29,21 +55,18 @@ export function converterCurrency(
 				amountCurrency = formData.get("currency-in-amount"),
 				convertCurrency = formData.get("currency-in-convert");
 
-			// if (e.target !== null && "name" in e.target) {
-			// 	const amountValue = e.target.name === "currency-amount" ? e.target
-			// }
-
 			changeIconsNearCurrency(
 				formData,
 				".amount-currency-flag",
 				".convert-currency-flag"
 			);
-		});
 
-		// currencyAmountInput.addEventListener("input", (e) => {
-		// 	// let convertedValue
-		// 	// testObj.then(data => console.log(data["conversion_rates"]))
-		// 	// currencyConvertedInput.value = ;
-		// });
+			convert(
+				amountValue,
+				amountCurrency,
+				convertCurrency,
+				"[name='currency-converted-to']"
+			);
+		});
 	}
 }
