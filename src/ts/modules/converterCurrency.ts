@@ -7,9 +7,11 @@ import {
 	type FormOrNull,
 } from "../types/htmlElement.types";
 import { changeIconsNearCurrency } from "./changeIconsNearCurrency";
+import { blockFunctionTenSeconds, modalWindowError } from "./modalWindowError";
 
 export function converterCurrency(formSelector: string) {
 	const form: FormOrNull = document.querySelector(formSelector);
+	const errorModal = blockFunctionTenSeconds(modalWindowError, 9999);
 
 	function convert<T extends FormDataEntryValue | null>(
 		amount: T,
@@ -26,13 +28,16 @@ export function converterCurrency(formSelector: string) {
 			isFormDataEntryValue(currencyInput) &&
 			isFormDataEntryValue(currencyOutput)
 		) {
-			getRecurce(urlRequest + currencyInput.toString().toUpperCase()).then(
-				(data) => {
+			getRecurce(urlRequest + currencyInput.toString().toUpperCase())
+				.then((data) => {
 					let currency: number =
 						data["conversion_rates"][currencyOutput.toString().toUpperCase()];
 					outputResult.value = (+amount * currency).toFixed(2).toString();
-				}
-			);
+				})
+				.catch(() => {
+					errorModal();
+					setTimeout(() => {}, 9999);
+				});
 		}
 
 		return;
@@ -71,11 +76,11 @@ export function converterCurrency(formSelector: string) {
 				e.target.name == "currency-converted-to"
 			) {
 				convert(
-				convertedValue,
-				convertCurrency,
-				amountCurrency,
-				"[name='currency-amount']"
-			);
+					convertedValue,
+					convertCurrency,
+					amountCurrency,
+					"[name='currency-amount']"
+				);
 			}
 		});
 	}

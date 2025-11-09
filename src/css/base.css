@@ -14,3 +14,17 @@ body {
 	position: relative;
 	color: rgba(0, 0, 0, 0.624);
 }
+
+.progress {
+	animation: progressUp 10s ease-in;
+}
+
+@keyframes progressUp {
+	from {
+		width: 0%;
+	}
+
+	to {
+		width: 100%;
+	}
+}
