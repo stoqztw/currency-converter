@@ -8,14 +8,7 @@ import {
 } from "../types/htmlElement.types";
 import { changeIconsNearCurrency } from "./changeIconsNearCurrency";
 
-// Алгоритм
-// 1. Ввод в инпут число
-// 2. Выбор вводной валюты
-// 3. Выбор выходной валюты
-// 4. Конвертация валюты
-// 5. Вывод выходной валюты
-
-export function converterCurrency(formSelector: string, convertdInput: string) {
+export function converterCurrency(formSelector: string) {
 	const form: FormOrNull = document.querySelector(formSelector);
 
 	function convert<T extends FormDataEntryValue | null>(
@@ -37,7 +30,7 @@ export function converterCurrency(formSelector: string, convertdInput: string) {
 				(data) => {
 					let currency: number =
 						data["conversion_rates"][currencyOutput.toString().toUpperCase()];
-						outputResult.value = (+amount * currency).toString();
+					outputResult.value = (+amount * currency).toFixed(2).toString();
 				}
 			);
 		}
@@ -61,12 +54,29 @@ export function converterCurrency(formSelector: string, convertdInput: string) {
 				".convert-currency-flag"
 			);
 
-			convert(
-				amountValue,
-				amountCurrency,
+			if (
+				e.target instanceof HTMLInputElement &&
+				e.target.name == "currency-amount"
+			) {
+				convert(
+					amountValue,
+					amountCurrency,
+					convertCurrency,
+					"[name='currency-converted-to']"
+				);
+			}
+
+			if (
+				e.target instanceof HTMLInputElement &&
+				e.target.name == "currency-converted-to"
+			) {
+				convert(
+				convertedValue,
 				convertCurrency,
-				"[name='currency-converted-to']"
+				amountCurrency,
+				"[name='currency-amount']"
 			);
+			}
 		});
 	}
 }
