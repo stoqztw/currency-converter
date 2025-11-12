@@ -1,9 +1,11 @@
+export const timeWorkModalWindow = 5000;
+
 export function modalWindowError() {
 	const body: HTMLBodyElement | null = document.querySelector("body"),
 		modalWindow: HTMLElement = document.createElement("div"),
 		timeId = setTimeout(() => {
 			modalWindow.innerHTML = "";
-		}, 9999);
+		}, timeWorkModalWindow);
 
 	modalWindow.classList.add("Modal");
 	modalWindow.innerHTML = `

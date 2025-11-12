@@ -7,11 +7,18 @@ import {
 	type FormOrNull,
 } from "../types/htmlElement.types";
 import { changeIconsNearCurrency } from "./changeIconsNearCurrency";
-import { blockFunctionTenSeconds, modalWindowError } from "./modalWindowError";
+import {
+	blockFunctionTenSeconds,
+	modalWindowError,
+	timeWorkModalWindow,
+} from "./modalWindowError";
 
 export function converterCurrency(formSelector: string) {
 	const form: FormOrNull = document.querySelector(formSelector);
-	const errorModal = blockFunctionTenSeconds(modalWindowError, 9999);
+	const errorModal = blockFunctionTenSeconds(
+		modalWindowError,
+		timeWorkModalWindow
+	);
 
 	function convert<T extends FormDataEntryValue | null>(
 		amount: T,
@@ -20,7 +27,8 @@ export function converterCurrency(formSelector: string) {
 		outputSelector: string
 	) {
 		const outputResult: HTMLInputElement | null =
-			document.querySelector(outputSelector);
+				document.querySelector(outputSelector),
+			inputElements = document.querySelectorAll("input");
 
 		if (
 			isInput(outputResult) &&
@@ -36,7 +44,18 @@ export function converterCurrency(formSelector: string) {
 				})
 				.catch(() => {
 					errorModal();
-					setTimeout(() => {}, 9999);
+					inputElements.forEach((element) => {
+						if (element) {
+							element.disabled = true;
+						}
+					});
+					setTimeout(() => {
+						inputElements.forEach((element) => {
+							if (element) {
+								element.disabled = false;
+							}
+						});
+					}, timeWorkModalWindow);
 				});
 		}
 
@@ -82,6 +101,10 @@ export function converterCurrency(formSelector: string) {
 					"[name='currency-amount']"
 				);
 			}
+		});
+
+		form.addEventListener("submit", (e) => {
+			e.preventDefault();
 		});
 	}
 }
